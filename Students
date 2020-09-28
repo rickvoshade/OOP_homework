@@ -1,0 +1,277 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+
+namespace StudentsManager {
+    abstract class Student
+    {
+        private string name;
+        protected string state;
+        public Student(string studentsName)
+        {
+            name = studentsName;
+            state = "";
+        }
+        public string GetStudentName()
+        {
+            return name;
+        }
+        public string GetStudentState()
+        {
+            return state;
+        }
+        public void Relax()
+        {
+            state += "Relax";
+        }
+        public void Write()
+        {
+            state += "Write";
+        }
+        public void Read()
+        {
+            state += "Read";
+        }
+        public abstract void Study();
+    }
+
+    class GoodStudent : Student
+    {
+        public GoodStudent(string studentsName) : base(studentsName)
+        {
+            state += "good";
+        }
+        public override void Study()
+        {
+            Read();
+            Write();
+            Read();
+            Write();
+            Relax();
+        }
+    }
+    class BadStudent : Student
+    {
+        public BadStudent(string studentsName) : base(studentsName)
+        {
+            state += "bad";
+        }
+        public override void Study()
+        {
+            Relax();
+            Relax();
+            Relax();
+            Relax();
+            Read();
+        }
+    }
+
+    class Group
+    {
+        private string groupName;
+        private List<Student> students = new List<Student>();
+        
+        public Group(string name)
+        {
+            groupName = name;
+        }
+        public string GetGroupName()
+        {
+            return groupName;
+        }
+        public void AddStudent(Student st)
+        {
+            students.Add(st);
+        }
+        public void GetInfo()
+        {
+            Console.WriteLine("Group: " + groupName);
+
+            if (students.Count > 0 )
+            {
+                Console.WriteLine("Students:");
+                foreach (Student st in students)
+                {
+                    Console.WriteLine("\t-Name: " + st.GetStudentName());
+                }
+            }
+            else
+            {
+                Console.WriteLine("There are no students in this group");
+            }
+        }
+
+        public void GetFullInfo()
+        {
+            Console.WriteLine("Group: " + groupName);
+
+            if (students.Count > 0)
+            {
+                Console.WriteLine("Students:");
+                foreach (Student st in students)
+                {
+                    Console.WriteLine("\t-Name: " + st.GetStudentName());
+                    Console.WriteLine("\t State: " + st.GetStudentState());
+                }
+            }
+            else
+            {
+                Console.WriteLine("There are no students in this group");
+            }
+        }
+
+    }
+    class GroupsMenu
+    {
+        public List<Group> groups;
+        public GroupsMenu()
+        {
+            groups = new List<Group>();
+        }
+        public List<Group> GetGroupList()
+        {
+            return groups;
+        }
+        public void AddGroup()
+        {
+            Console.WriteLine("Type the group name, please: ");
+            groups.Add(new Group(Console.ReadLine()));
+        }
+        public void AddStudent(Group group)
+        {
+            bool unsuccessfulInput = true;
+            do
+            {
+                unsuccessfulInput = false;
+
+                Console.WriteLine("Type the student name, please:");
+
+                string studentName = Console.ReadLine();
+
+                Console.Write("Type the student state, please:(good/bad): ");
+
+                string studentType = Console.ReadLine();
+
+                if (studentType.ToLower() == "good")
+                {
+                    group.AddStudent(new GoodStudent(studentName));
+                }
+                else if (studentType.ToLower() == "bad")
+                {
+                    group.AddStudent(new BadStudent(studentName));
+                }
+                else
+                {
+                    Console.WriteLine("Invalid student state. Try one more time..");
+                    unsuccessfulInput = true;
+                }
+            } while (unsuccessfulInput);
+        }
+        public void GroupSelection()
+        {
+            Console.WriteLine("Select the group: ");
+
+            for (int i = 0; i < groups.Count; ++i)
+            {
+                Console.WriteLine(String.Format("[{0}] {1}", i + 1, groups[i].GetGroupName()));
+            }
+
+            Group chosenGroup = groups[Convert.ToInt32(Console.ReadLine()) - 1];
+
+            bool returned = false;
+
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Group " + chosenGroup.GetGroupName());
+                Console.WriteLine();
+                Console.WriteLine("[1] Get list of students' names");
+                Console.WriteLine("[2] Get list of students' names and states");
+                Console.WriteLine("[3] Add student to a chosen group");
+                Console.WriteLine("[4] Return");
+                Console.WriteLine();
+                Console.WriteLine("Please, choose: ");
+                ConsoleKey selectedOption = Console.ReadKey().Key;
+
+                Console.Clear();
+                switch (selectedOption)
+                {
+                    case ConsoleKey.D1:
+                        chosenGroup.GetInfo();
+                        Console.ReadKey();
+                        break;
+
+                    case ConsoleKey.D2:
+                        chosenGroup.GetFullInfo();
+                        Console.ReadKey();
+                        break;
+
+                    case ConsoleKey.D3:
+                        AddStudent(chosenGroup);
+                        break;
+                    case ConsoleKey.D4:
+                        returned = true;
+                        break;
+                    default:
+                        break;
+                }
+            } while (!returned);
+        }
+        public void PrintGroups()
+        {
+            if (groups.Count > 0)
+            {
+                Console.WriteLine("Groups: ");
+                foreach (Group group in groups)
+                {
+                    Console.WriteLine(String.Format("{0}", group.GetGroupName()));
+                }
+            }
+            else
+            {
+                Console.WriteLine("There are no groups");
+            }
+        }
+    }
+    class Program
+    {
+
+        static void Main()
+        {
+            GroupsMenu groupManager = new GroupsMenu();
+
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("You can view groups and students here");
+                Console.WriteLine();
+                Console.WriteLine("[1] View all groups");
+                Console.WriteLine("[2] Create a group");
+                Console.WriteLine("[3] Choose a group");
+                Console.WriteLine();
+                Console.WriteLine("Please, choose: ");
+                ConsoleKey selectedOption = Console.ReadKey().Key;
+                Console.WriteLine();
+                Console.Clear();
+
+                if (selectedOption == ConsoleKey.D1)
+                {
+                    groupManager.PrintGroups();
+                    Console.ReadKey();
+                }
+                else if (selectedOption == ConsoleKey.D2)
+                {
+                    groupManager.AddGroup();
+                }
+                else if (selectedOption == ConsoleKey.D3)
+                {
+                    groupManager.GroupSelection();
+                }
+                else
+                {
+                    continue;
+                }
+            } while (true);
+        }
+    }
+}
